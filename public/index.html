@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.io Private Chat</title>
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+</head>
+<body>
+    <h2>Socket.io Private Chat</h2>
+    <input type="text" id="userId" placeholder="Enter your user ID">
+    <button onclick="registerUser()">Register</button>
+
+    <hr>
+
+    <input type="text" id="receiverId" placeholder="Receiver's User ID">
+    <input type="text" id="message" placeholder="Type message">
+    <button onclick="sendMessage()">Send</button>
+
+    <hr>
+
+    <div id="messages"></div>
+
+    <script>
+        const socket = io("http://localhost:3000");
+
+        function registerUser() {
+            const userId = document.getElementById("userId").value;
+            if (!userId) {
+                alert("Please enter a user ID!");
+                return;
+            }
+            socket.emit("register", userId);
+            console.log(`Registered as ${userId}`);
+        }
+
+        function sendMessage() {
+            const senderId = document.getElementById("userId").value;
+            const receiverId = document.getElementById("receiverId").value;
+            const message = document.getElementById("message").value;
+
+            if (!senderId || !receiverId || !message) {
+                alert("Please fill in all fields.");
+                return;
+            }
+
+            socket.emit("privateMessage", { senderId, receiverId, message });
+        }
+
+        socket.on("messageReceived", ({ senderId, message }) => {
+            const messageBox = document.getElementById("messages");
+            messageBox.innerHTML += `<p><strong>${senderId}:</strong> ${message}</p>`;
+        });
+    </script>
+</body>
+</html>
